@@ -3,7 +3,9 @@
     <CLASSES>
       <root url="file://$PROJECT_DIR$/../lib/jnetpcap-1.3.0" />
     </CLASSES>
-    <JAVADOC />
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../lib/jnetpcap-javadoc-1.3.0-1.zip!/jnetpcap-javadoc-1.3.0-1" />
+    </JAVADOC>
     <NATIVE>
       <root url="file://$PROJECT_DIR$/../lib/jnetpcap-1.3.0" />
     </NATIVE>

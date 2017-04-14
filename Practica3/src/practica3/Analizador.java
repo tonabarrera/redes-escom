@@ -27,10 +27,10 @@ public class Analizador {
         }
 
         PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
-            int numeroTrama = 0;
+            int numeroTrama = 1;
             @Override
             public void nextPacket(PcapPacket packet, String user) {
-                System.out.printf("--- #%d Received packet at %s caplen=%-4d len=%-4d %s ---\n", numeroTrama++,
+                System.out.printf("--- #%d Received packet at %s caplen=%-4d len=%-4d %s ---\n", numeroTrama,
                         new Date(packet.getCaptureHeader().timestampInMillis()),
                         packet.getCaptureHeader().caplen(),  // Length actually captured
                         packet.getCaptureHeader().wirelen(), // Original length
@@ -48,7 +48,7 @@ public class Analizador {
                 int longitud = (packet.getUByte(12) << 8) + packet.getUByte(13);
 
                 if (longitud <= 1500) {
-                    System.out.println("-----La trama es IEEE802.3-----");
+                    System.out.println("-----La trama numero "+ (numeroTrama++) +" es IEEE802.3-----");
                     System.out.printf("-Tamaño: %d bytes | Valor en la trama: %x\n",
                             longitud, longitud);
                     System.out.printf("-La mac destino es: %02x:%02x:%02x:%02x:%02x:%02x\n",
@@ -59,19 +59,77 @@ public class Analizador {
                     int dsap = packet.getUByte(14);
                     String CRBit;
                     String IGBit;
-                    IGBit = (dsap & 0x00000001) == 1 ? "Grupal" : "Individual";
-                    CRBit = (ssap & 0x00000001) == 1 ? "Respuesta" : "Comando";
+                    IGBit = (dsap & 0x1) == 1 ? "Grupal" : "Individual";
+                    CRBit = (ssap & 0x1) == 1 ? "Respuesta" : "Comando";
                     System.out.printf("-IG Bit: %s | Valor: %02X \n", IGBit, dsap);
                     System.out.printf("-CR Bit: %s | Valor: %02X \n", CRBit, ssap);
-                    int control = packet.getUByte(16);
-                    if ((control & 0x00000011) == 1) {
-                        System.out.println("-El control es no numerado");
-                    }
-                    System.out.printf("-Control: %02X\n", control);
+                    int extendido = packet.getByte(17);
+                    int control = packet.getByte(16);
+                    // comando -Poll
+                    // Respuesta - Final
+                    if ((control & 0x3) == 0x3) {
+                        int PFBit;
+                        System.out.printf("-El control es no numerado [%x]\n", control);
+                        int SNRM = 0b10000011; //C
+                        int SNRME = 0b11001111; //C
+                        int SARM_DM = 0b00001111; //C/R
+                        int SABM = 0b00101111; //C
+                        int SABME = 0b01101111; //C
+                        int UI = 0b00000011; //C/R
+                        int UA = 0b01100011; //R
+                        int DISC_RD = 0b01000011; //C/R
+                        int RSET = 0b10001111; //C
+                        int XID = 0b10101111; //C/R
 
+                        if((packet.getByte(16) & 0b00010000) == 16){
+                            PFBit = 1;
+                        }else{
+                            PFBit =0;
+                        }
+
+                        if (CRBit.equals("Comando")) {
+                            if ((control ^ SNRM) == 0 || (control ^ SNRM) == 16) {
+                                System.out.println("-Tipo SNRM | Bit P/F => [P="+ PFBit + "]");
+                            } else if ((control ^ SNRME) == 0 || (control ^ SNRME) == 16) {
+                                System.out.println("-TIpo SNRME | Bit P/F => [P=" + PFBit + "]");
+                            } else if ((control ^ SARM_DM) == 0 || (control ^ SARM_DM) == 16) {
+                                System.out.println("-Tipo SARM | Bit P/F => [P=" + PFBit + "]");
+                            } else if ((control ^ SABM) == 0 || (control ^ SABM) == 16) {
+                                System.out.println("-TIpo SABM | Bit P/F => [P=" + PFBit + "]");
+                            } else if ((control ^ SABME) == 0 || (control ^ SABME) == 16) {
+                                System.out.println("-TIpo SABME | Bit P/F => [P=" + PFBit + "]");
+                            } else if ((control ^ UI) == 0 || (control ^ UI) == 16) {
+                                System.out.println("-TIpo UI | Bit P/F => [P=" + PFBit + "]");
+                            } else if ((control ^ DISC_RD) == 0 || (control ^ DISC_RD) == 16) {
+                                System.out.println("-TIpo DISC | Bit P/F => [P=" + PFBit + "]");
+                            } else if ((control ^ RSET) == 0 || (control ^ RSET) == 16) {
+                                System.out.println("-TIpo RSET | Bit P/F => [P=" + PFBit + "]");
+                            } else if ((control ^ XID) == 0 || (control ^ XID) == 16) {
+                                System.out.println("-TIpo XID | Bit P/F => [P=" + PFBit + "]");
+                            }
+                        } else {
+                            if ((control ^ SARM_DM) == 0 || (control ^ SARM_DM) == 16) {
+                                System.out.println("-TIpo DM | Bit P/F => [F=" + PFBit + "]");
+                            } else if ((control ^ UI) == 0 || (control ^ UI) == 16) {
+                                System.out.println("-TIpo UI | Bit P/F => [F=" + PFBit + "]");
+                            } else if ((control ^ UA) == 0 || (control ^ UA) == 16) {
+                                System.out.println("-TIpo UA | Bit P/F => [F=" + PFBit + "]");
+                            } else if ((control ^ DISC_RD) == 0 || (control ^ DISC_RD) == 16) {
+                                System.out.println("-TIpo RD | Bit P/F => [F=" + PFBit + "]");
+                            } else if ((control ^ XID) == 0 || (control ^ XID) == 16) {
+                                System.out.println("-TIpo XID | Bit P/F => [F=" + PFBit + "]");
+                            }
+                        }
+                    } else if ((control & 0b11) == 0b01) {
+                        System.out.println("El control es de Supervision");
+                    } else if ((control & 0b1) == 0b0) {
+                        System.out.println("El control es de  Informacion");
+                    } else
+                        System.out.println("***ERROR***");
+                    // corrimiento de 8 a 16 y sumar el otro bit
                     System.out.println("");
                 } else {
-                    System.out.println("\n-----La trama es Ethernet-----\n\n");
+                    System.out.println("\n-----La trama numero: "+ (numeroTrama++) + " es Ethernet-----\n\n");
                 }
             }
 
