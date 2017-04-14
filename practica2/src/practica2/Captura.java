@@ -14,6 +14,8 @@ import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
 import org.jnetpcap.PcapBpfProgram;
+import org.jnetpcap.protocol.lan.Ethernet;
+import org.jnetpcap.protocol.lan.IEEE802dot3;
 
 
 public class Captura {
@@ -112,17 +114,34 @@ public class Captura {
                         if(i%16==15)
                             System.out.println("");
                     }
+                    /* Una forma de hacer la parte de tipo
+                    IEEE802dot3 i3e = new IEEE802dot3();
+                    if (packet.hasHeader(i3e)) {
+                        System.out.printf("\n---Longitud=%04X\n", packet.getUByte(13));
+                    } 
+                    Ethernet eth = new Ethernet();
+                    if (packet.hasHeader(eth)) {
+                        System.out.printf("\n---Longitud=%04X\n", packet.getUByte(12));
+                        int thisType = eth.type();
+                        System.out.printf("\n--Super tipo %04X \n", thisType);
+                    }
+                    */
+                    byte destino[] = packet.getByteArray(0, 6);
+                    byte origen[] = packet.getByteArray(6, 6);
+                    
                     //packet.getUByte(12) * 256
                     int tipo = (packet.getUByte(12) << 8) + packet.getUByte(13); 
 
                     System.out.println("\n\nEncabezado: \n" + packet.toHexdump());
-                    System.out.println("La mac destino es: " + packet.toHexdump().substring(6, 24));
-                    System.out.println("La mac origen es: " + packet.toHexdump().substring(25, 43));
+                    System.out.printf("-La mac destino es: %02x:%02x:%02x:%02x:%02x:%02x\n", 
+                            destino[0], destino[1], destino[2], destino[3], destino[4], destino[5]);
+                    System.out.printf("-La mac origen es: %02x:%02x:%02x:%02x:%02x:%02x\n", 
+                            origen[0], origen[1], origen[2], origen[3], origen[4], origen[5]);
 
                     if(tipo <=1500)
-                        System.out.println("El tipo es: IEEE.802.3");
+                        System.out.println("El tipo es: IEEE.802.3 " + tipo);
                     else
-                        System.out.println("El tipo es: Ethernet");
+                        System.out.println("El tipo es: Ethernet " + tipo);
                     
                     System.out.println("-------------------------------------------------------\n");
                 }
