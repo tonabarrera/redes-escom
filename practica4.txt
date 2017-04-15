@@ -1,0 +1,8 @@
+Descarcar los archivos de 148.204.58.221/axel/redesnp/sniffer/jnetpcap
+--Envia.java reglas de filtrado
+--checksum.siz
+correr la aplicacion wireshark y usar el filtro: eth.type=0x1601
+correr el archivo Envia.java y verificar en wireshark las tramas capturadas
+Probar el archivo checksum.java con diferentes entradas
+Implementar un pequeño protocolo de comunicación que incluya (sintaxis, semantica y temporización)
+A partir del protocolo implementar un programa que permita al usuario transmitir un archivo a otra maquina dada
