@@ -9,7 +9,10 @@
     <NATIVE>
       <root url="file://$PROJECT_DIR$/../lib/jnetpcap-1.3.0" />
     </NATIVE>
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../lib/jnetpcap-src-1.3.0-1.zip!/jnetpcap-src-1.3.0-1/src/java1.5" />
+      <root url="jar://$PROJECT_DIR$/../lib/jnetpcap-src-1.3.0-1.zip!/jnetpcap-src-1.3.0-1/tests/java1.5" />
+    </SOURCES>
     <jarDirectory url="file://$PROJECT_DIR$/../lib/jnetpcap-1.3.0" recursive="false" />
   </library>
 </component>

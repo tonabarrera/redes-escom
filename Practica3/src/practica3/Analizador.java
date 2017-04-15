@@ -65,10 +65,10 @@ public class Analizador {
                     System.out.printf("-CR Bit: %s | Valor: %02X \n", CRBit, ssap);
                     int extendido = packet.getByte(17);
                     int control = packet.getByte(16);
+                    int PFBit;
                     // comando -Poll
                     // Respuesta - Final
                     if ((control & 0x3) == 0x3) {
-                        int PFBit;
                         System.out.printf("-El control es no numerado [%x]\n", control);
                         int SNRM = 0b10000011; //C
                         int SNRME = 0b11001111; //C
@@ -113,7 +113,7 @@ public class Analizador {
                             } else if ((control ^ UI) == 0 || (control ^ UI) == 16) {
                                 System.out.println("-TIpo UI | Bit P/F => [F=" + PFBit + "]");
                             } else if ((control ^ UA) == 0 || (control ^ UA) == 16) {
-                                System.out.println("-TIpo UA | Bit P/F => [F=" + PFBit + "]");
+                                System.out.println("-Tipo UA | Bit P/F => [F=" + PFBit + "]");
                             } else if ((control ^ DISC_RD) == 0 || (control ^ DISC_RD) == 16) {
                                 System.out.println("-TIpo RD | Bit P/F => [F=" + PFBit + "]");
                             } else if ((control ^ XID) == 0 || (control ^ XID) == 16) {
@@ -121,9 +121,72 @@ public class Analizador {
                             }
                         }
                     } else if ((control & 0b11) == 0b01) {
-                        System.out.println("El control es de Supervision");
+                        System.out.println("-El control es de Supervision");
+                        if (extendido == 0) {
+                            System.out.printf("-El valor N(R) = %X\n", control >> 5);
+                            if((control & 0b00010000) == 16){
+                                PFBit = 1;
+                            }else{
+                                PFBit = 0;
+                            }
+                            if (CRBit.equals("Comando"))
+                                System.out.println("-El Bit P/F => [P=" + PFBit + "]");
+                            else
+                                System.out.println("-El Bit P/F => [F=" + PFBit + "]");
+                        } else {
+                            System.out.printf("-El valor N(R) = %X\n", extendido >> 1);
+                            if((extendido & 0b1) == 1){
+                                PFBit = 1;
+                            }else{
+                                PFBit = 0;
+                            }
+                            if (CRBit.equals("Comando"))
+                                System.out.println("-El Bit P/F => [P=" + PFBit + "]");
+                            else
+                                System.out.println("-El Bit P/F => [F=" + PFBit + "]");
+                        }
+                        // Codigo
+                        int RR = 0b00;
+                        int REJ = 0b10;
+                        int RNR = 0b01;
+                        int SREJ = 0b11;
+                        if (((control>>2) & 0b11) == RR) {
+                            System.out.println("-El tipo es RR");
+                        } else if (((control>>2) & 0b11) == REJ) {
+                            System.out.println("-El tipo es REJ");
+                        } else if (((control>>2) & 0b11) == RNR) {
+                            System.out.println("-El tipo es RNR");
+                        } else if ((((control>>2) & 0b11) == SREJ) ) {
+                            System.out.println("-El tipo es SREJ");
+                        }
                     } else if ((control & 0b1) == 0b0) {
-                        System.out.println("El control es de  Informacion");
+                        System.out.println("-El control es de  Informacion");
+                        if (extendido == 0) {
+                            System.out.printf("-El valor N(R) = %X\n", control >> 5);
+                            System.out.printf("-El valor N(S) = %X\n", (control >> 1) & 0b111);
+
+                            if((control & 0b00010000) == 16){
+                                PFBit = 1;
+                            }else{
+                                PFBit = 0;
+                            }
+                            if (CRBit.equals("Comando"))
+                                System.out.println("-El Bit P/F => [P=" + PFBit + "]");
+                            else
+                                System.out.println("-El Bit P/F => [F=" + PFBit + "]");
+                        } else {
+                            System.out.printf("-El valor N(R) = %X\n", extendido >> 1);
+                            System.out.printf("-El valor N(S) = %X\n", control >> 1);
+                            if((extendido & 0b1) == 1){
+                                PFBit = 1;
+                            }else{
+                                PFBit = 0;
+                            }
+                            if (CRBit.equals("Comando"))
+                                System.out.println("-El Bit P/F => [P=" + PFBit + "]");
+                            else
+                                System.out.println("-El Bit P/F => [F=" + PFBit + "]");
+                        }
                     } else
                         System.out.println("***ERROR***");
                     // corrimiento de 8 a 16 y sumar el otro bit
@@ -132,7 +195,6 @@ public class Analizador {
                     System.out.println("\n-----La trama numero: "+ (numeroTrama++) + " es Ethernet-----\n\n");
                 }
             }
-
         };
         pcap.loop(-1, jpacketHandler, "REDES");
         pcap.close();
