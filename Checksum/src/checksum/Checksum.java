@@ -1,3 +1,5 @@
+package checksum;
+
 public class Checksum {
 
   /**
