@@ -45,41 +45,8 @@ public class Envia {
         }
 
         System.out.println("Dispositivos encontrados:\n");
-        int i = 0;
-        try{
-            for (PcapIf device : alldevs) {
-                String description = (device.getDescription() != null) ? device.getDescription()
-                                : "No description available";
-                final byte[] mac = device.getHardwareAddress();
-                String dir_mac = (mac == null) ? "No tiene direccion MAC" : asString(mac);
-                System.out.printf("#%d: %s [%s] MAC:[%s]\n", i++, device.getName(),
-                                  description, dir_mac);
-                Iterator<PcapAddr> it = device.getAddresses().iterator();
-                while(it.hasNext()) {
-                    PcapAddr dir = it.next();//dir, familia, mascara, bc
-                    PcapSockAddr direccion = dir.getAddr();
-                    byte[] d_ip = direccion.getData();
-                    int familia = direccion.getFamily();
-                    int[] ipv4 = new int[4];
-                    if(familia == org.jnetpcap.PcapSockAddr.AF_INET) {
-                        ipv4[0] = ((int)d_ip[0] < 0) ? ((int)d_ip[0]) + 256 : (int)d_ip[0];
-                        ipv4[1] = ((int)d_ip[1] < 0) ? ((int)d_ip[1]) + 256 : (int)d_ip[1];
-                        ipv4[2] = ((int)d_ip[2] < 0) ? ((int)d_ip[2]) + 256 : (int)d_ip[2];
-                        ipv4[3] = ((int)d_ip[3] < 0) ? ((int)d_ip[3]) + 256 : (int)d_ip[3];
+        getDevices(alldevs);
 
-                        System.out.println("IP4-> " + ipv4[0] + "." + ipv4[1] + "." + ipv4[2] + "." + ipv4[3]);
-                    } else if(familia == org.jnetpcap.PcapSockAddr.AF_INET6){
-                        System.out.print("IP6-> ");
-                        for (byte aD_ip : d_ip)
-                            System.out.printf("%02X:", aD_ip);
-                        System.out.println("");
-                    }//if
-                }//while
-                System.out.println("");
-            }//for
-        } catch(IOException io){
-            io.printStackTrace();
-        }
         try{
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             System.out.println("Elije la interfaz de red:");
@@ -113,6 +80,17 @@ public class Envia {
              */
             pcap = Pcap.openLive(device.getName(), SNAPLEN, FLAGS, TIMEOUT, errbuf);
 
+            /*F I L T R O*/
+            PcapBpfProgram filter = new PcapBpfProgram();
+            String expression = "ether proto 0x1601"; // "port 80";
+            int optimize = 0; // 1 means true, 0 means false
+            int netmask = 0;
+            int r2 = pcap.compile(filter, expression, optimize, netmask);
+            if (r2 != Pcap.OK) {
+                System.out.println("Filter error: " + pcap.getErr());
+            }//if
+            pcap.setFilter(filter);
+
             /*
              * Third we create our crude packet we will transmit out
              * This creates a broadcast packet
@@ -144,17 +122,6 @@ public class Envia {
 
             //Arrays.fill(a, (byte) 0xff);
             //ByteBuffer b = ByteBuffer.wrap(trama);
-            // Aqui empieza la lectura de las tramas que se envian
-            /*F I L T R O*/
-            PcapBpfProgram filter = new PcapBpfProgram();
-            String expression = "ether proto 0x1601"; // "port 80";
-            int optimize = 0; // 1 means true, 0 means false
-            int netmask = 0;
-            int r2 = pcap.compile(filter, expression, optimize, netmask);
-            if (r2 != Pcap.OK) {
-                System.out.println("Filter error: " + pcap.getErr());
-            }//if
-            pcap.setFilter(filter);
             /*
              Fourth We send our packet off using open device
              */
@@ -204,5 +171,44 @@ public class Envia {
             e.printStackTrace();
         }
         pcap.loop(1, capturaHandler, "");
+    }
+
+    private static void getDevices(List<PcapIf> alldevs) {
+        try {
+            int i = 0;
+            for (PcapIf device : alldevs) {
+                String description = (device.getDescription() != null) ? device.getDescription()
+                        : "No description available";
+                final byte[] mac = device.getHardwareAddress();
+                String dir_mac = (mac == null) ? "No tiene direccion MAC" : asString(mac);
+                System.out.printf("#%d: %s [%s] MAC:[%s]\n", i++, device.getName(),
+                                  description, dir_mac);
+                Iterator<PcapAddr> it = device.getAddresses().iterator();
+                while (it.hasNext()) {
+                    PcapAddr dir = it.next();//dir, familia, mascara, bc
+                    PcapSockAddr direccion = dir.getAddr();
+                    byte[] d_ip = direccion.getData();
+                    int familia = direccion.getFamily();
+                    int[] ipv4 = new int[4];
+                    if (familia == org.jnetpcap.PcapSockAddr.AF_INET) {
+                        ipv4[0] = ((int) d_ip[0] < 0) ? ((int) d_ip[0]) + 256 : (int) d_ip[0];
+                        ipv4[1] = ((int) d_ip[1] < 0) ? ((int) d_ip[1]) + 256 : (int) d_ip[1];
+                        ipv4[2] = ((int) d_ip[2] < 0) ? ((int) d_ip[2]) + 256 : (int) d_ip[2];
+                        ipv4[3] = ((int) d_ip[3] < 0) ? ((int) d_ip[3]) + 256 : (int) d_ip[3];
+
+                        System.out.println(
+                                "IP4-> " + ipv4[0] + "." + ipv4[1] + "." + ipv4[2] + "." + ipv4[3]);
+                    } else if (familia == org.jnetpcap.PcapSockAddr.AF_INET6) {
+                        System.out.print("IP6-> ");
+                        for (byte aD_ip : d_ip)
+                            System.out.printf("%02X:", aD_ip);
+                        System.out.println("");
+                    }//if
+                }//while
+                System.out.println("");
+            }//for
+        } catch(IOException io){
+            io.printStackTrace();
+        }
     }
 }
