@@ -18,6 +18,7 @@ public class Analizador {
     private static final String ARCHIVO = "paquetes3.pcap";
 
     public static void main(String[] args){
+        System.out.printf("Leyendo el archivo [%s]...\n\n", ARCHIVO);
         Pcap pcap;
         StringBuilder errbuf = new StringBuilder();
         pcap = Pcap.openOffline(ARCHIVO, errbuf);
