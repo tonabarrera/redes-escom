@@ -6,10 +6,6 @@
 package practica3;
 
 import org.jnetpcap.Pcap;
-import org.jnetpcap.packet.PcapPacket;
-import org.jnetpcap.packet.PcapPacketHandler;
-
-import java.util.Date;
 /**
  *
  * @author tona
