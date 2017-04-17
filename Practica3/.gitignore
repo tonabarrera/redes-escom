@@ -48,3 +48,4 @@ fabric.properties
 .idea/modules.xml
 Practica3.iml
 test/
+build/classes/practica3/
