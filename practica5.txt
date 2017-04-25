@@ -1,0 +1,8 @@
+Seleccionar el 2811 por tener más interfaces
+usar la interfaz wic-2T
+poner el primer switch
+poner computadoras
+conectar por cable azul
+en la computadora seleccionar la version que no es eternet
+y en el router se selecciona consola
+--El rayo es magico pero toma la primera interfaz

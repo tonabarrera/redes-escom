@@ -1,0 +1,128 @@
+Enrutamiento estatico
+
+Programa Cisco 	Packet Tracer 
+Colocar en el diagrama el Enrutador modelo 2811 (tiene mas interfaces de red)
+Apagar enrutador y arrastrar WIC-2T 2 veces 
+Copiar dos veces el enrutador y pegar 
+
+Ir a la seccion de switches, y colocar el primero (generico), un switch por cada router
+Poner una computadora por cada switch (estan en end devices)
+
+Interconectar equipos:
+Seleccionar en conexiones el cable consola (2do color azul cielo) para conectar la computadora con un router
+router- consola y computadora-RS232
+
+
+Conectar  2 router con interfaz serial y  el restante con interfaz 
+DCE() Seleccionar Serial de un router con el serial de otro router 
+(se ponen puntos rojos por que la interfaz esta apagada)
+
+Interfaz ethernet (cooper crossover** y la otra de cooper) Seleccionar una ethernet y otra ethernet de cada router
+
+Diferentes capas para conectar dispositivos se utiliza conexion uno a uno
+
+---------------------------------------------------------------------------------------------------------------------
+
+Para las computadoras se tienen que especificar: IP, Mascara, Puerta de enlace(default gateway)
+Ejemplo 1: 200.1.1.0/24   255.255.255.0   200.1.1.254
+Desktop -> IP configuration ->  Static -> 200.1.1.1  -> 255.255.255.0 -> 200.1.1.254 -> DNS no se llena(para mapear) y listo
+Hacer lo mismo para las otras
+
+Seleccionar otra computadora para saber si una maquina alcanza a otra, seleccionar compu, desktop, Command prompt y devuelve la terminal. Poner ping y la direccion de la maquina y si existe devuelve el tiempo de conexion
+
+
+Interfaz de router- Configuracion
+clic izquierdo en enrutador, 3 pestañas en la ventana
+seleccionar CLI:
+ena 
+conf t
+hostname "nombre" //sin comillas
+int fa0/1//configurar interfaz
+ip address 200.1.1.254 255.255.255.0
+no shutdown //se prende el foco de la interfaz ethernet
+exit
+
+//configurar otra serial 0/3/1
+int se0/3/1
+ip address 200.1.4.254 255.255.255.0
+clock rate 4000000 //* solo se especifica con la serial, con ethernet nel
+no shutdown
+
+//segundo enrutador, interfaz se0/1/0
+ena
+conf t
+hostname R1
+int se0/1/0
+ip address 200.1.4.253 255.255.255.0 //ya no se configura cloc por que esta configurado en el otro lado
+no shutdown
+
+//configurar la interfaz fast ethernet de los routers
+exit
+int fa0/0
+ip address 200.1.5.254 255.255.255.0
+no shutdown
+
+//
+exit 
+int fa0/1
+ip address 200.1.
+
+
+//para ver que llevo configurado del router
+salir del modo de configuracion ctrl +z luego comando sh run
+guardar los cambios con wr 
+
+//reiniciar router con reload
+
+//ultimo router
+ena 
+conf t
+hostname R3
+int fa0/0
+ip address 200.1.5.253 255.255.255.0
+no shutdown
+
+exit
+int fa0/1
+ip address 200.1.3.254 255.255.255.0
+no shutdown
+
+control+z
+
+//hasta aqui configuradas todas las ip de cada enrutador 
+//hacer lo mismo para las compu
+
+//para hacer que llegue a las otras interfaces del primer router en R0
+conf t 
+ip route 200.1.2.0 255.255.255.0 se0/3/1
+//asi para cada segmento que falte
+ip route 200.1.5.0 255.255.255.0 se0/3/1
+ip route 200.1.3.0 255.255.255.0 se0/3/1
+
+comando sh ip route para ver tabla de enrutamiento 
+S -> que conoce de manera estatica
+C -> que la conoce por que esta conectado directamente
+
+
+//agregar rutas estaticas al resto de los routers para que lleguen de regreso 
+//para R1
+ena
+conf t
+ip route 200.1.1.0 255.255.255.0 se0/1/0
+ip route 200.1.3.0 255.255.255.0 fa0/0
+control z
+
+//para R2
+ena 
+conf t
+ip route 200.1.1.0 255.255.255.0 fa0/0
+ip route 200.1.4.0 255.255.255.0 fa0/0
+ip route 200.1.2.0 255.255.255.0 fa0/0
+control z
+
+
+
+
+ 
+
+
