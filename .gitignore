@@ -23,3 +23,10 @@
 hs_err_pid*
 /Sniffer/nbproject/private/
 /Sniffer/build/
+
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/

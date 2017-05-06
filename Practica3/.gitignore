@@ -49,3 +49,10 @@ fabric.properties
 Practica3.iml
 test/
 build/classes/practica3/
+
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
