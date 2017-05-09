@@ -117,7 +117,7 @@ public class captura {
             try
             {
                 
-                nombre = "C:\\Users\\tevod\\Desktop\\"+nombre;
+                nombre = "C:\\Users\\reymy\\Desktop\\"+nombre;
                 
                 //String nom = "C:\\Users\\tevod\\Desktop\\"+nomAux;
                 OutputStream out = new FileOutputStream(nombre);
