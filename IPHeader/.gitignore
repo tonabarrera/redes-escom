@@ -1,4 +1,10 @@
-# Created by .ignore support plugin (hsz.mobi)
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
 ### Example user template template
 ### Example user template
 
@@ -8,7 +14,6 @@
 out
 gen### Java template
 # Compiled class file
-*.class
 
 # Log file
 *.log
