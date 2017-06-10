@@ -99,7 +99,7 @@ public class IPHeader {
                 System.err.println("Error while opening device for capture: " + errbuf.toString());
                 return;
             }
-            pcap.loop(5, handler, "REDES");
+            pcap.loop(70, handler, "REDES");
         }
         if (pcap != null)
             pcap.close();
